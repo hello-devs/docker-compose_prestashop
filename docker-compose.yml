@@ -1,0 +1,51 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: mariadb:10.4.13
+    restart: always
+    volumes:
+      - ./mariadb:/var/lib/mysql
+    environment:
+      TZ: "Europe/Paris"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_PASSWORD: 'ROOT_PASSWORD'
+      MYSQL_USER: 'USERNAME'
+      MYSQL_PASSWORD: 'USER_PASSWORD'
+      MYSQL_DATABASE: 'ps-dev'
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8071:8080"
+    environment:
+      ADMINER_DESIGN: pepa-linha
+      ADMINER_PLUGINS: tables-filter tinymce
+    depends_on:
+      - db
+
+  ps-dev:
+    image: prestashop/prestashop:1.7.8.0-rc.1-apache
+    restart: always
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "8070:80"
+    depends_on:
+      - db
+    environment:
+      PS_DEV_MODE: 1
+      PS_INSTALL_AUTO: 1
+      PS_DOMAIN: '127.0.0.1:8070'
+      PS_FOLDER_ADMIN: 'admin2525'
+      DB_SERVER: db
+      DB_NAME: 'ps-dev'
+      DB_USER: 'USERNAME'
+      DB_PASSWD: 'USER_PASSWORD'
+      DB_PREFIX: 'ps_'
+      PS_LANGUAGE: fr
+      ADMIN_MAIL: demo@demo.com
+      ADMIN_PASSWD: demodemo
